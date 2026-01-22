@@ -93,9 +93,9 @@ template <int INSTID = 0>
 void transport_timer(	
     stream<rxTimerUpdate>&	rxClearTimer_req,
 	stream<ap_uint<24> >&	txSetTimer_req,
-	stream<retransmission>&	timer2retrans_req
+	stream<retransmission>&	timer2retrans_req,
     //MT zaaron
-    stream<ap_uint<32> >&   timer_out
+    stream<ap_uint<32> >&   timer2flowcontrol
 ) {
 #pragma HLS PIPELINE II=1
 #pragma HLS INLINE off
@@ -133,7 +133,7 @@ void transport_timer(
 		else
 		{
             //MT zaaron
-            if (!timer_out.full() && tt_update.isRC_Ack)
+            if (!timer2flowcontrol.full() && tt_update.isRC_Ack)
             {
                 entry = transportTimerTable[tt_update.qpn];
                 if (entry.retries < RETRANS_S1) {
@@ -148,7 +148,7 @@ void transport_timer(
                 else {
                     tt_timer_out = TIME_64ms;
                 }
-                timer_out.write(tt_timer_out - entry.time);
+                timer2flowcontrol.write(tt_timer_out - entry.time);
             }
             //zaaron end
 			transportTimerTable[tt_update.qpn].time = 0;
