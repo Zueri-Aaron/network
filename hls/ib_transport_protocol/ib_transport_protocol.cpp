@@ -495,7 +495,7 @@ void rx_exh_fsm(
     stream<retransmission>&	rx2retrans_req,
     stream<retransRdInit>&  retrans2rx_init,
 	//MT zaaron
-	stream<ap_uint<32> >&    timer_out,
+	stream<ap_uint<32> >&    timer2flowctrl,
 #endif
 	//stream<ap_uint<64> >& rx_readReqAddr_pop_rsp,
 	stream<ExHeader<WIDTH> >& headerInput,
@@ -555,7 +555,7 @@ void rx_exh_fsm(
 		break;
 	case DMA_META:
 	//MT zaaron
-		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && (meta.op_code != RC_ACK || timer_out.empty()))
+		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && (meta.op_code != RC_ACK || timer2flowctrl.empty()))
 		{
 
 			msnTable2rxExh_rsp.read(dmaMeta);
@@ -573,7 +573,7 @@ void rx_exh_fsm(
 			//MT zaaron
 			if (meta.op_code == RC_ACK)
 			{
-				timer_out.read(timer_val);
+				timer2flowctrl.read(timer_val);
 			}
 			pe_fsmState = DATA;
 		}
@@ -2462,7 +2462,7 @@ void ib_transport_protocol(
 	 */
 #ifdef RETRANS_EN
 	//MT zaaron
-	static stream<ap_uint<32> > timer_out("timer_out");
+	static stream<ap_uint<32> > timer2flowcontrol("timer2flowcontrol");
 	static stream<rxTimerUpdate> rxClearTimer_req("rxClearTimer_req");
 	static stream<ap_uint<24> > txSetTimer_req("txSetTimer_req");
 	static stream<retransUpdate> rx2retrans_upd("rx2retrans_upd");
@@ -2474,7 +2474,7 @@ void ib_transport_protocol(
 	static stream<retransEntry>	tx2retrans_insertRequest("tx2retrans_insertRequest");
 	static stream<retransEvent> retransmitter2exh_eventFifo("retransmitter2exh_eventFifo");
 	//MT zaaron
-	#pragma HLS STREAM depth=2 variable=timer_out
+	#pragma HLS STREAM depth=2 variable=timer2flowcontrol
 	#pragma HLS STREAM depth=2 variable=rxClearTimer_req
 	#pragma HLS STREAM depth=2 variable=txSetTimer_req
 	#pragma HLS STREAM depth=2 variable=rx2retrans_upd
