@@ -35,6 +35,7 @@ void rocev2(
 	// S(R)Q
 	hls::stream<txMeta>& s_axis_sq_meta,
 
+	// MT zaaron
 	// ACKs
 	hls::stream<ackMeta>& m_axis_rx_ack_meta,
 				
@@ -178,7 +179,7 @@ void rocev2_top(
 	stream<ap_axiu<DATA_WIDTH, 0, 0, 0> >& m_axis_tx_data,
 				
 	stream<txMeta>&	s_axis_sq_meta,
-
+	//MT zaaron
 	stream<ackMeta>& m_axis_rx_ack_meta,
 				
 	//Memory
@@ -298,6 +299,7 @@ void rocev2_top(
 				
 	stream<txMeta>&	s_axis_sq_meta,
 
+	// MT zaaron
 	stream<ackMeta>& m_axis_rx_ack_meta,
 				
 	//Memory

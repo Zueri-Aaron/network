@@ -235,6 +235,7 @@ struct txMeta
 				:op_code(op), qpn(qp), host(host), lst(lst), offs(offs), raddr(raddr), laddr(laddr), len(len), imm(imm) {}
 };
 
+//MT zaaron
 /* ACK meta */
 struct ackMeta 
 {
@@ -244,10 +245,11 @@ struct ackMeta
     ap_uint<4> dst;
     ap_uint<2> strm;
     ap_uint<1> lst;
+	ap_uint<32> timer_val;
 
 	ackMeta() {}
-	ackMeta(ibOpCode op_code, ap_uint<16> qpn, ap_uint<1> host, ap_uint<4> dst, ap_uint<2> strm, ap_uint<1> lst)
-		: op_code(op_code), qpn(qpn), host(host), dst(dst), strm(strm),  lst(lst) {}
+	ackMeta(ibOpCode op_code, ap_uint<16> qpn, ap_uint<1> host, ap_uint<4> dst, ap_uint<2> strm, ap_uint<1> lst, ap_uint<32> timer_val)
+		: op_code(op_code), qpn(qpn), host(host), dst(dst), strm(strm),  lst(lst), timer_val(timer_val) {}
 };
 
 /* Event */

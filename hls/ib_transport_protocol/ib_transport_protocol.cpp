@@ -355,7 +355,8 @@ void rx_ibh_fsm(
 				// Check if no oustanding requests -> stop timer
 				if (isResponse && meta.op_code != RC_RDMA_READ_RESP_MIDDLE)
 				{
-					rxClearTimer_req.write(rxTimerUpdate(meta.dest_qp, meta.psn == qpState.max_forward));
+					//MT zaaron
+					rxClearTimer_req.write(rxTimerUpdate(meta.dest_qp, meta.psn == qpState.max_forward, meta.op_code == RC_ACK));
 #ifndef __SYNTHESIS__
 					if (meta.psn  == qpState.max_forward)
 					{
@@ -493,6 +494,8 @@ void rx_exh_fsm(
 	//stream<rxReadReqRsp>& readReqTable_rsp,
     stream<retransmission>&	rx2retrans_req,
     stream<retransRdInit>&  retrans2rx_init,
+	//MT zaaron
+	stream<ap_uint<32> >&    timer_out,
 #endif
 	//stream<ap_uint<64> >& rx_readReqAddr_pop_rsp,
 	stream<ExHeader<WIDTH> >& headerInput,
@@ -519,6 +522,8 @@ void rx_exh_fsm(
 	static bool consumeReadInit;
 	//static rxReadReqRsp readReqMeta;
 	static retransRdInit readReqInit;
+	//MT zaaron
+	static ap_uint<32> timer_val;
 
 
 	switch (pe_fsmState)
@@ -531,6 +536,8 @@ void rx_exh_fsm(
 
 			rxExh2msnTable_upd_req.write(rxMsnReq(meta.dest_qp));
 			consumeReadInit = false;
+			//MT zaaron
+			timer_val = 0;
 
 #ifdef RETRANS_EN // ?
 			/*if (meta.op_code == RC_ACK)
@@ -547,7 +554,8 @@ void rx_exh_fsm(
 		}
 		break;
 	case DMA_META:
-		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()))
+	//MT zaaron
+		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && (meta.op_code != RC_ACK || timer_out.empty()))
 		{
 
 			msnTable2rxExh_rsp.read(dmaMeta);
@@ -561,6 +569,11 @@ void rx_exh_fsm(
 			if (consumeReadInit)
 			{
 				retrans2rx_init.read(readReqInit);
+			}
+			//MT zaaron
+			if (meta.op_code == RC_ACK)
+			{
+				timer_out.read(timer_val);
 			}
 			pe_fsmState = DATA;
 		}
@@ -691,9 +704,10 @@ void rx_exh_fsm(
 			AckExHeader<WIDTH> ackHeader = exHeader.getAckHeader();
 			if(meta.op_code == RC_RDMA_READ_RESP_ONLY || meta.op_code == RC_RDMA_READ_RESP_LAST)
 			{
+				//MT zaaron TODO what to do?
 				m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(15,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
-                    readReqInit.lst));
+                    readReqInit.lst, timer_val));
 			}
 
 			if (ackHeader.isNAK())
@@ -750,10 +764,10 @@ void rx_exh_fsm(
 		{
 			// [BTH][AETH]
 			AckExHeader<WIDTH> ackHeader = exHeader.getAckHeader();
-
+			//MT zaaron
             m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(19,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
-                    readReqInit.lst));
+                    readReqInit.lst, timer_val));
 
 			std::cout << "[RX EXH FSM " << INSTID << "]: syndrome: " << std::hex << ackHeader.getSyndrome() << std::endl;
 #ifdef RETRANS_EN
@@ -2186,6 +2200,7 @@ void ib_transport_protocol(
 	// S(R)Q
 	stream<txMeta>& s_axis_sq_meta,
 
+	// MT zaaron
 	// ACKs
 	stream<ackMeta>& m_axis_rx_ack_meta,
 
@@ -2446,6 +2461,8 @@ void ib_transport_protocol(
 	 * TIMER & RETRANSMITTER
 	 */
 #ifdef RETRANS_EN
+	//MT zaaron
+	static stream<ap_uint<32> > timer_out("timer_out");
 	static stream<rxTimerUpdate> rxClearTimer_req("rxClearTimer_req");
 	static stream<ap_uint<24> > txSetTimer_req("txSetTimer_req");
 	static stream<retransUpdate> rx2retrans_upd("rx2retrans_upd");
@@ -2456,6 +2473,8 @@ void ib_transport_protocol(
 	static stream<retransAddrLen> tx2retrans_insertAddrLen("tx2retrans_insertAddrLen");
 	static stream<retransEntry>	tx2retrans_insertRequest("tx2retrans_insertRequest");
 	static stream<retransEvent> retransmitter2exh_eventFifo("retransmitter2exh_eventFifo");
+	//MT zaaron
+	#pragma HLS STREAM depth=2 variable=timer_out
 	#pragma HLS STREAM depth=2 variable=rxClearTimer_req
 	#pragma HLS STREAM depth=2 variable=txSetTimer_req
 	#pragma HLS STREAM depth=2 variable=rx2retrans_upd
@@ -2559,6 +2578,8 @@ void ib_transport_protocol(
         //rx_readReqTable_upd_rsp,
         rx2retrans_req,
         retrans2rx_init,
+		//MT zaaron
+		timer2flowctrl,
 #endif
 		//rx_readReqAddr_pop_rsp,
 		rx_drop2exhFsm_MetaFifo,
@@ -2747,7 +2768,9 @@ void ib_transport_protocol(
 	transport_timer<INSTID>(
 		rxClearTimer_req,
 		txSetTimer_req,
-		timer2retrans_req
+		timer2retrans_req,
+		//MT zaaron
+		timer2flowctrl
 	);
 
 	retransmitter<INSTID>(	
@@ -2770,7 +2793,7 @@ template void ib_transport_protocol<DATA_WIDTH, ninst>(		   	\
 	stream<ipUdpMeta>& m_axis_tx_meta,		                    \
 	stream<net_axis<DATA_WIDTH> >& m_axis_tx_data,		        \
 	stream<txMeta>& s_axis_sq_meta,		                       	\
-	stream<ackMeta>& m_axis_rx_ack_meta,		                \
+	stream<ackMeta>& m_axis_rx_ack_meta,		            	\
 	stream<memCmd>& m_axis_mem_write_cmd,		                \
 	stream<memCmd>& m_axis_mem_read_cmd,		                \
 	stream<net_axis<DATA_WIDTH> >& m_axis_mem_write_data,		\
@@ -2793,7 +2816,7 @@ template void ib_transport_protocol<DATA_WIDTH, ninst>(		   	\
 	stream<ipUdpMeta>& m_axis_tx_meta,		                    \
 	stream<net_axis<DATA_WIDTH> >& m_axis_tx_data,		        \
 	stream<txMeta>& s_axis_sq_meta,		                       	\
-	stream<ackMeta>& m_axis_rx_ack_meta,		                \
+	stream<ackMeta>& m_axis_rx_ack_meta,		            	\
 	stream<memCmd>& m_axis_mem_write_cmd,		                \
 	stream<memCmd>& m_axis_mem_read_cmd,		                \
 	stream<net_axis<DATA_WIDTH> >& m_axis_mem_write_data,		\

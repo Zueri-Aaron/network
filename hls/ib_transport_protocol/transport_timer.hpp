@@ -73,9 +73,12 @@ struct rxTimerUpdate
 {
 	ap_uint<16> qpn;
 	bool stop;
+    //MT zaaron
+    bool isRC_Ack;
 	rxTimerUpdate() {}
-	rxTimerUpdate(ap_uint<16> qpn, bool stop)
-		:qpn(qpn), stop(stop) {}
+    //MT zaaron
+    rxTimerUpdate(ap_uint<16> qpn, bool stop, bool isRC_Ack)
+        :qpn(qpn), stop(stop), isRC_Ack(isRC_Ack) {}
 };
 
 /*
@@ -91,6 +94,8 @@ void transport_timer(
     stream<rxTimerUpdate>&	rxClearTimer_req,
 	stream<ap_uint<24> >&	txSetTimer_req,
 	stream<retransmission>&	timer2retrans_req
+    //MT zaaron
+    stream<ap_uint<32> >&   timer_out
 ) {
 #pragma HLS PIPELINE II=1
 #pragma HLS INLINE off
@@ -108,7 +113,8 @@ void transport_timer(
 
 	static ap_uint<16>			tt_currPosition = 0;
 	static bool tt_WaitForWrite = false;
-
+    //MT zaaron
+    static ap_uint<32>       tt_timer_out = 0;
 
 	ap_uint<16> checkQP;
 	static rxTimerUpdate tt_update;
@@ -126,6 +132,25 @@ void transport_timer(
 		}
 		else
 		{
+            //MT zaaron
+            if (!timer_out.full() && tt_update.isRC_Ack)
+            {
+                entry = transportTimerTable[tt_update.qpn];
+                if (entry.retries < RETRANS_S1) {
+                    tt_timer_out = TIME_1ms;
+                }
+                else if (entry.retries < RETRANS_S2) {
+                    tt_timer_out = TIME_5ms;
+                }
+                else if (entry.retries < RETRANS_S3) {
+                    tt_timer_out = TIME_12ms;
+                }
+                else {
+                    tt_timer_out = TIME_64ms;
+                }
+                timer_out.write(tt_timer_out - entry.time);
+            }
+            //zaaron end
 			transportTimerTable[tt_update.qpn].time = 0;
 			transportTimerTable[tt_update.qpn].active = false;
 		}
