@@ -495,7 +495,7 @@ void rx_exh_fsm(
     stream<retransmission>&	rx2retrans_req,
     stream<retransRdInit>&  retrans2rx_init,
 	//MT zaaron
-	stream<ap_uint<32> >&    timer2flowctrl,
+	stream<ap_uint<32> >&    timer2flowcontrol,
 #endif
 	//stream<ap_uint<64> >& rx_readReqAddr_pop_rsp,
 	stream<ExHeader<WIDTH> >& headerInput,
@@ -555,7 +555,7 @@ void rx_exh_fsm(
 		break;
 	case DMA_META:
 	//MT zaaron
-		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && (meta.op_code != RC_ACK || timer2flowctrl.empty()))
+		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && (meta.op_code != RC_ACK || timer2flowcontrol.empty()))
 		{
 
 			msnTable2rxExh_rsp.read(dmaMeta);
@@ -573,7 +573,7 @@ void rx_exh_fsm(
 			//MT zaaron
 			if (meta.op_code == RC_ACK)
 			{
-				timer2flowctrl.read(timer_val);
+				timer2flowcontrol.read(timer_val);
 			}
 			pe_fsmState = DATA;
 		}
@@ -2579,7 +2579,7 @@ void ib_transport_protocol(
         rx2retrans_req,
         retrans2rx_init,
 		//MT zaaron
-		timer2flowctrl,
+		timer2flowcontrol,
 #endif
 		//rx_readReqAddr_pop_rsp,
 		rx_drop2exhFsm_MetaFifo,
@@ -2770,7 +2770,7 @@ void ib_transport_protocol(
 		txSetTimer_req,
 		timer2retrans_req,
 		//MT zaaron
-		timer2flowctrl
+		timer2flowcontrol
 	);
 
 	retransmitter<INSTID>(	
