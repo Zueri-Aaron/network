@@ -555,7 +555,8 @@ void rx_exh_fsm(
 		break;
 	case DMA_META:
 	//MT zaaron
-		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && (meta.op_code != RC_ACK || timer2flowcontrol.empty()))
+	bool timerready = (meta.op_code != RC_ACK) || !timer2flowcontrol.empty()
+		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && timerready)
 		{
 
 			msnTable2rxExh_rsp.read(dmaMeta);
