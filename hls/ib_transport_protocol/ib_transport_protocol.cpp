@@ -539,6 +539,9 @@ void rx_exh_fsm(
 			consumeReadInit = false;
 			//MT zaaron
 			timer_val = 0;
+#ifdef DBG_IBV
+			transport_timer_dbg.write(0);
+#endif
 
 #ifdef RETRANS_EN // ?
 			/*if (meta.op_code == RC_ACK)
@@ -558,7 +561,9 @@ void rx_exh_fsm(
 	//MT zaaron
 		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && ((meta.op_code != RC_ACK) || !timer2flowcontrol.empty()))
 		{
+#ifdef DBG_IBV
 			transport_timer_dbg.write(1); //MT zaaron
+#endif
 			msnTable2rxExh_rsp.read(dmaMeta);
 			udpLengthFifo.read(udpLength);
 #ifdef RETRANS_EN
@@ -574,7 +579,9 @@ void rx_exh_fsm(
 			//MT zaaron
 			if (meta.op_code == RC_ACK)
 			{
+#ifdef DBG_IBV
 				transport_timer_dbg.write(2);
+#endif
 				timer2flowcontrol.read(timer_val);
 			}
 			pe_fsmState = DATA;
@@ -583,6 +590,7 @@ void rx_exh_fsm(
 	case DATA: // TODO merge with DMA_META
         #ifdef DBG_IBV
             m_axis_dbg.write(psnPkg(meta.op_code, meta.psn, meta.dest_qp, 0));
+			transport_timer_dbg.write(5); //MT zaaron
         #endif
 
 		switch(meta.op_code)
@@ -707,7 +715,9 @@ void rx_exh_fsm(
 			if(meta.op_code == RC_RDMA_READ_RESP_ONLY || meta.op_code == RC_RDMA_READ_RESP_LAST)
 			{
 				//MT zaaron TODO what to do?
-				//transport_timer_dbg.write(4);
+#ifdef DBG_IBV
+				transport_timer_dbg.write(4);
+#endif
 				m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(15,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
                     readReqInit.lst, timer_val));
@@ -768,7 +778,9 @@ void rx_exh_fsm(
 			// [BTH][AETH]
 			AckExHeader<WIDTH> ackHeader = exHeader.getAckHeader();
 			//MT zaaron
-			//transport_timer_dbg.write(3);
+#ifdef DBG_IBV
+			transport_timer_dbg.write(3);
+#endif
             m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(19,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
                     readReqInit.lst, timer_val));
