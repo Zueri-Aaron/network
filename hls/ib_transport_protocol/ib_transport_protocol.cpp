@@ -2222,7 +2222,7 @@ void ib_transport_protocol(
     stream<psnPkg>& m_axis_dbg_1,
     stream<psnPkg>& m_axis_dbg_2,
 	// MT zaaron
-	stream<ap_uint<24> >& transport_timer_dbg,
+	stream<ap_uint<32> >& transport_timer_dbg,
 #endif
 	ap_uint<32>& regInvalidPsnDropCount,
     ap_uint<32>& regRetransCount,
