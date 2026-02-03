@@ -485,6 +485,7 @@ template <int WIDTH, int INSTID = 0>
 void rx_exh_fsm(
 #ifdef DBG_IBV
     stream<psnPkg>&	m_axis_dbg,
+	stream<ap_uint<32> >& transport_timer_dbg, //MT zaaron
 #endif
 	stream<ibhMeta>& metaIn,
 	stream<ap_uint<16> >& udpLengthFifo,
@@ -557,7 +558,7 @@ void rx_exh_fsm(
 	//MT zaaron
 		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && ((meta.op_code != RC_ACK) || !timer2flowcontrol.empty()))
 		{
-
+			transport_timer_dbg.write(1); //MT zaaron
 			msnTable2rxExh_rsp.read(dmaMeta);
 			udpLengthFifo.read(udpLength);
 #ifdef RETRANS_EN
@@ -573,6 +574,7 @@ void rx_exh_fsm(
 			//MT zaaron
 			if (meta.op_code == RC_ACK)
 			{
+				transport_timer_dbg.write(2);
 				timer2flowcontrol.read(timer_val);
 			}
 			pe_fsmState = DATA;
@@ -2219,6 +2221,8 @@ void ib_transport_protocol(
 	stream<psnPkg>& m_axis_dbg_0,
     stream<psnPkg>& m_axis_dbg_1,
     stream<psnPkg>& m_axis_dbg_2,
+	// MT zaaron
+	stream<ap_uint<24> >& transport_timer_dbg,
 #endif
 	ap_uint<32>& regInvalidPsnDropCount,
     ap_uint<32>& regRetransCount,
@@ -2765,11 +2769,10 @@ void ib_transport_protocol(
 #ifdef RETRANS_EN
 	merge_retrans_request(tx2retrans_insertMeta, tx2retrans_insertAddrLen, tx2retrans_insertRequest);
 
-	transport_timer<INSTID>(
+	transport_timer<INSTID>( //MT zaaron
 		rxClearTimer_req,
 		txSetTimer_req,
 		timer2retrans_req,
-		//MT zaaron
 		timer2flowcontrol
 	);
 
@@ -2785,7 +2788,7 @@ void ib_transport_protocol(
 
 }
 
-#ifdef DBG_IBV
+#ifdef DBG_IBV //MT zaaron
 #define ib_transport_protocol_spec_decla(ninst)                 \
 template void ib_transport_protocol<DATA_WIDTH, ninst>(		   	\
 	stream<ipUdpMeta>& s_axis_rx_meta,		                    \
@@ -2803,6 +2806,7 @@ template void ib_transport_protocol<DATA_WIDTH, ninst>(		   	\
 	stream<psnPkg>& m_axis_dbg_0,		                        \
     stream<psnPkg>& m_axis_dbg_1,		                        \
     stream<psnPkg>& m_axis_dbg_2,		                        \
+	stream<ap_uint<32> >& transport_timer_dbg,                  \
 	ap_uint<32>& regInvalidPsnDropCount,		                \
     ap_uint<32>& regRetransCount,		                        \
 	ap_uint<32>& regIbvCountRx,		                       	    \

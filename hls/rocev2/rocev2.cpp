@@ -55,6 +55,7 @@ void rocev2(
 	hls::stream<psnPkg>& m_axis_dbg_0,
     hls::stream<psnPkg>& m_axis_dbg_1,
     hls::stream<psnPkg>& m_axis_dbg_2,
+	hls::stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
 #endif
 	ap_uint<32>& regCrcDropPkgCount,
 	ap_uint<32>& regInvalidPsnDropCount,
@@ -164,6 +165,7 @@ void rocev2(
 		m_axis_dbg_0,
 		m_axis_dbg_1,
 		m_axis_dbg_2,
+		transport_timer_dbg,	//MT zaaron
 #endif
 		regInvalidPsnDropCount,
         regRetransCount,
@@ -198,6 +200,7 @@ void rocev2_top(
 	stream<psnPkg>& m_axis_dbg_0,
 	stream<psnPkg>& m_axis_dbg_1,
 	stream<psnPkg>& m_axis_dbg_2,
+	stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
 #endif 
 	ap_uint<32>& regCrcDropPkgCount,
 	ap_uint<32>& regInvalidPsnDropCount,
@@ -243,7 +246,10 @@ void rocev2_top(
 	#pragma HLS INTERFACE axis register port=m_axis_dbg_1
 	#pragma HLS aggregate  variable=m_axis_dbg_1 compact=bit
 	#pragma HLS INTERFACE axis register port=m_axis_dbg_2
-	#pragma HLS aggregate  variable=m_axis_dbg_2 compact=bit   
+	#pragma HLS aggregate  variable=m_axis_dbg_2 compact=bit  
+	//MT zaaron
+	#pragma HLS INTERFACE axis register port=transport_timer_dbg
+	#pragma HLS aggregate  variable=transport_timer_dbg compact=bit
 #endif 
 	#pragma HLS INTERFACE ap_vld port=regCrcDropPkgCount
 
@@ -284,6 +290,7 @@ void rocev2_top(
 		m_axis_dbg_0,
 		m_axis_dbg_1,
 		m_axis_dbg_2,
+		transport_timer_dbg,	//MT zaaron
 #endif 
 		regCrcDropPkgCount,
 		regInvalidPsnDropCount,
@@ -318,6 +325,7 @@ void rocev2_top(
 	stream<psnPkg>& m_axis_dbg_0,
 	stream<psnPkg>& m_axis_dbg_1,
 	stream<psnPkg>& m_axis_dbg_2,
+	stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
 #endif 
 	ap_uint<32>& regCrcDropPkgCount,
 	ap_uint<32>& regInvalidPsnDropCount,
@@ -364,6 +372,9 @@ void rocev2_top(
 	#pragma HLS DATA_PACK variable=m_axis_dbg_1
 	#pragma HLS INTERFACE axis register port=m_axis_dbg_2
 	#pragma HLS DATA_PACK variable=m_axis_dbg_2
+	//MT zaaron
+	#pragma HLS INTERFACE axis register port=transport_timer_dbg
+	#pragma HLS DATA_PACK variable=transport_timer_dbg
 #endif 
 
 	#pragma HLS INTERFACE ap_vld port=regCrcDropPkgCount
@@ -388,6 +399,7 @@ void rocev2_top(
 		m_axis_dbg_0,
 		m_axis_dbg_1,
 		m_axis_dbg_2,
+		transport_timer_dbg,	//MT zaaron
 #endif 
 		regCrcDropPkgCount,
 		regInvalidPsnDropCount,
