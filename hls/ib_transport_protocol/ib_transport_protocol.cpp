@@ -2573,6 +2573,7 @@ void ib_transport_protocol(
 	rx_exh_fsm<WIDTH, INSTID>(	
     #ifdef DBG_IBV
 		m_axis_dbg_2,
+		transport_timer_dbg,
 #endif 
 		rx_fsm2exh_MetaFifo,
 		exh_lengthFifo,
