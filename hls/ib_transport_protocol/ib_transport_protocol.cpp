@@ -540,7 +540,7 @@ void rx_exh_fsm(
 			//MT zaaron
 			timer_val = 0;
 #ifdef DBG_IBV
-			transport_timer_dbg.write(0);
+			transport_timer_dbg.write(6);
 #endif
 
 #ifdef RETRANS_EN // ?
