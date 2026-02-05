@@ -95,7 +95,10 @@ void transport_timer(
 	stream<ap_uint<24> >&	txSetTimer_req,
 	stream<retransmission>&	timer2retrans_req,
     //MT zaaron
-    stream<ap_uint<32> >&   timer2flowcontrol
+    stream<ap_uint<32> >&   timer2flowcontrol,
+#ifdef DBG_IBV
+    stream<ap_uint<32> >&   transport_timer_dbg
+#endif
 ) {
 #pragma HLS PIPELINE II=1
 #pragma HLS INLINE off
@@ -126,6 +129,9 @@ void transport_timer(
 	if (!rxClearTimer_req.empty())
 	{
 		rxClearTimer_req.read(tt_update);
+#ifdef DBG_IBV
+        transport_timer_dbg.write(11);
+#endif
 		if (!tt_update.stop)
 		{
 			transportTimerTable[tt_update.qpn].time = TIME_1ms;
@@ -133,8 +139,14 @@ void transport_timer(
 		else
 		{
             //MT zaaron
+#ifdef DBG_IBV
+            transport_timer_dbg.write(12);
+#endif
             if (!timer2flowcontrol.full() && tt_update.isRC_Ack)
             {
+#ifdef DBG_IBV
+                transport_timer_dbg.write(13);
+#endif
                 entry = transportTimerTable[tt_update.qpn];
                 if (entry.retries < RETRANS_S1) {
                     tt_timer_out = TIME_1ms;

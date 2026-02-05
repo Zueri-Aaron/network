@@ -613,6 +613,7 @@ void ib_transport_protocol(
     hls::stream<psnPkg>& m_axis_dbg_1, 
     hls::stream<psnPkg>& m_axis_dbg_2, 
 	hls::stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
+	hls::stream<ap_uint<32> >& transport_protocol_dbg,
 #endif
 	ap_uint<32>& regInvalidPsnDropCount,
     ap_uint<32>& regRetransCount,

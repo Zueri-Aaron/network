@@ -485,7 +485,7 @@ template <int WIDTH, int INSTID = 0>
 void rx_exh_fsm(
 #ifdef DBG_IBV
     stream<psnPkg>&	m_axis_dbg,
-	stream<ap_uint<32> >& transport_timer_dbg, //MT zaaron
+	stream<ap_uint<32> >& transport_protocol_dbg, //MT zaaron
 #endif
 	stream<ibhMeta>& metaIn,
 	stream<ap_uint<16> >& udpLengthFifo,
@@ -540,7 +540,7 @@ void rx_exh_fsm(
 			//MT zaaron
 			timer_val = 0;
 #ifdef DBG_IBV
-			transport_timer_dbg.write(6);
+			transport_protocol_dbg.write(6);
 #endif
 
 #ifdef RETRANS_EN // ?
@@ -562,7 +562,7 @@ void rx_exh_fsm(
 		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && ((meta.op_code != RC_ACK) || !timer2flowcontrol.empty()))
 		{
 #ifdef DBG_IBV
-			transport_timer_dbg.write(1); //MT zaaron
+			transport_protocol_dbg.write(1); //MT zaaron
 #endif
 			msnTable2rxExh_rsp.read(dmaMeta);
 			udpLengthFifo.read(udpLength);
@@ -580,7 +580,7 @@ void rx_exh_fsm(
 			if (meta.op_code == RC_ACK)
 			{
 #ifdef DBG_IBV
-				transport_timer_dbg.write(2);
+				transport_protocol_dbg.write(2);
 #endif
 				timer2flowcontrol.read(timer_val);
 			}
@@ -590,7 +590,7 @@ void rx_exh_fsm(
 	case DATA: // TODO merge with DMA_META
         #ifdef DBG_IBV
             m_axis_dbg.write(psnPkg(meta.op_code, meta.psn, meta.dest_qp, 0));
-			transport_timer_dbg.write(5); //MT zaaron
+			transport_protocol_dbg.write(5); //MT zaaron
         #endif
 
 		switch(meta.op_code)
@@ -716,7 +716,7 @@ void rx_exh_fsm(
 			{
 				//MT zaaron TODO what to do?
 #ifdef DBG_IBV
-				transport_timer_dbg.write(4);
+				transport_protocol_dbg.write(4);
 #endif
 				m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(15,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
@@ -779,7 +779,7 @@ void rx_exh_fsm(
 			AckExHeader<WIDTH> ackHeader = exHeader.getAckHeader();
 			//MT zaaron
 #ifdef DBG_IBV
-			transport_timer_dbg.write(3);
+			transport_protocol_dbg.write(3);
 #endif
             m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(19,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
@@ -2237,6 +2237,7 @@ void ib_transport_protocol(
     stream<psnPkg>& m_axis_dbg_2,
 	// MT zaaron
 	stream<ap_uint<32> >& transport_timer_dbg,
+	stream<ap_uint<32> >& transport_protocol_dbg,
 #endif
 	ap_uint<32>& regInvalidPsnDropCount,
     ap_uint<32>& regRetransCount,
@@ -2587,7 +2588,7 @@ void ib_transport_protocol(
 	rx_exh_fsm<WIDTH, INSTID>(	
     #ifdef DBG_IBV
 		m_axis_dbg_2,
-		transport_timer_dbg,
+		transport_protocol_dbg,
 #endif 
 		rx_fsm2exh_MetaFifo,
 		exh_lengthFifo,
@@ -2788,7 +2789,10 @@ void ib_transport_protocol(
 		rxClearTimer_req,
 		txSetTimer_req,
 		timer2retrans_req,
-		timer2flowcontrol
+		timer2flowcontrol,
+#ifdef DBG_IBV
+		transport_timer_dbg
+#endif
 	);
 
 	retransmitter<INSTID>(	
@@ -2822,6 +2826,7 @@ template void ib_transport_protocol<DATA_WIDTH, ninst>(		   	\
     stream<psnPkg>& m_axis_dbg_1,		                        \
     stream<psnPkg>& m_axis_dbg_2,		                        \
 	stream<ap_uint<32> >& transport_timer_dbg,                  \
+	stream<ap_uint<32> >& transport_protocol_dbg,				\
 	ap_uint<32>& regInvalidPsnDropCount,		                \
     ap_uint<32>& regRetransCount,		                        \
 	ap_uint<32>& regIbvCountRx,		                       	    \

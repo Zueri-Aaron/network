@@ -56,6 +56,7 @@ void rocev2(
     hls::stream<psnPkg>& m_axis_dbg_1,
     hls::stream<psnPkg>& m_axis_dbg_2,
 	hls::stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
+	hls::stream<ap_uint<32> >& transport_protocol_dbg,
 #endif
 	ap_uint<32>& regCrcDropPkgCount,
 	ap_uint<32>& regInvalidPsnDropCount,
@@ -166,6 +167,7 @@ void rocev2(
 		m_axis_dbg_1,
 		m_axis_dbg_2,
 		transport_timer_dbg,	//MT zaaron
+		transport_protocol_dbg,
 #endif
 		regInvalidPsnDropCount,
         regRetransCount,
@@ -201,6 +203,7 @@ void rocev2_top(
 	stream<psnPkg>& m_axis_dbg_1,
 	stream<psnPkg>& m_axis_dbg_2,
 	stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
+	stream<ap_uint<32> >& transport_protocol_dbg,
 #endif 
 	ap_uint<32>& regCrcDropPkgCount,
 	ap_uint<32>& regInvalidPsnDropCount,
@@ -250,6 +253,8 @@ void rocev2_top(
 	//MT zaaron
 	#pragma HLS INTERFACE axis register port=transport_timer_dbg
 	#pragma HLS aggregate  variable=transport_timer_dbg compact=bit
+	#pragma HLS INTERFACE axis register port=transport_protocol_dbg
+	#pragma HLS aggregate  variable=transport_protocol_dbg compact=bit
 #endif 
 	#pragma HLS INTERFACE ap_vld port=regCrcDropPkgCount
 
@@ -291,6 +296,7 @@ void rocev2_top(
 		m_axis_dbg_1,
 		m_axis_dbg_2,
 		transport_timer_dbg,	//MT zaaron
+		transport_protocol_dbg,
 #endif 
 		regCrcDropPkgCount,
 		regInvalidPsnDropCount,
@@ -326,6 +332,7 @@ void rocev2_top(
 	stream<psnPkg>& m_axis_dbg_1,
 	stream<psnPkg>& m_axis_dbg_2,
 	stream<ap_uint<32> >& transport_timer_dbg,	//MT zaaron
+	stream<ap_uint<32> >& transport_protocol_dbg,
 #endif 
 	ap_uint<32>& regCrcDropPkgCount,
 	ap_uint<32>& regInvalidPsnDropCount,
@@ -375,6 +382,8 @@ void rocev2_top(
 	//MT zaaron
 	#pragma HLS INTERFACE axis register port=transport_timer_dbg
 	#pragma HLS DATA_PACK variable=transport_timer_dbg
+	#pragma HLS INTERFACE axis register port=transport_protocol_dbg
+	#pragma HLS DATA_PACK variable=transport_protocol_dbg
 #endif 
 
 	#pragma HLS INTERFACE ap_vld port=regCrcDropPkgCount
@@ -400,6 +409,7 @@ void rocev2_top(
 		m_axis_dbg_1,
 		m_axis_dbg_2,
 		transport_timer_dbg,	//MT zaaron
+		transport_protocol_dbg,
 #endif 
 		regCrcDropPkgCount,
 		regInvalidPsnDropCount,
