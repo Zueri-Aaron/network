@@ -138,20 +138,26 @@ void transport_timer(
 #ifdef DBG_IBV
             transport_timer_dbg.write(14);
 #endif
-            entry = transportTimerTable[tt_update.qpn];
-            if (entry.retries < RETRANS_S1) {
-                tt_timer_out = TIME_1ms;
+            if (!timer2flowcontrol.full() && tt_update.isRC_Ack)
+            {
+#ifdef DBG_IBV
+                transport_timer_dbg.write(15);
+#endif
+                entry = transportTimerTable[tt_update.qpn];
+                if (entry.retries < RETRANS_S1) {
+                    tt_timer_out = TIME_1ms;
+                }
+                else if (entry.retries < RETRANS_S2) {
+                    tt_timer_out = TIME_5ms;
+                }
+                else if (entry.retries < RETRANS_S3) {
+                    tt_timer_out = TIME_12ms;
+                }
+                else {
+                    tt_timer_out = TIME_64ms;
+                }
+                timer2flowcontrol.write(tt_timer_out - entry.time);
             }
-            else if (entry.retries < RETRANS_S2) {
-                tt_timer_out = TIME_5ms;
-            }
-            else if (entry.retries < RETRANS_S3) {
-                tt_timer_out = TIME_12ms;
-            }
-            else {
-                tt_timer_out = TIME_64ms;
-            }
-            timer2flowcontrol.write(tt_timer_out - entry.time);
 			transportTimerTable[tt_update.qpn].time = TIME_1ms;
 		}
 		else
