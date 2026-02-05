@@ -590,7 +590,7 @@ void rx_exh_fsm(
 	case DATA: // TODO merge with DMA_META
         #ifdef DBG_IBV
             m_axis_dbg.write(psnPkg(meta.op_code, meta.psn, meta.dest_qp, 0));
-			//transport_timer_dbg.write(5); //MT zaaron
+			transport_timer_dbg.write(5); //MT zaaron
         #endif
 
 		switch(meta.op_code)
@@ -716,7 +716,7 @@ void rx_exh_fsm(
 			{
 				//MT zaaron TODO what to do?
 #ifdef DBG_IBV
-				//transport_timer_dbg.write(4);
+				transport_timer_dbg.write(4);
 #endif
 				m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(15,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
@@ -779,7 +779,7 @@ void rx_exh_fsm(
 			AckExHeader<WIDTH> ackHeader = exHeader.getAckHeader();
 			//MT zaaron
 #ifdef DBG_IBV
-			//transport_timer_dbg.write(3);
+			transport_timer_dbg.write(3);
 #endif
             m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(19,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,
