@@ -48,15 +48,15 @@ static const ap_uint<32> TIME_5ms		= 10;
 static const ap_uint<32> TIME_12ms		= 10;
 static const ap_uint<32> TIME_64ms		= 10;
 #else
-static const ap_uint<32> TIME_10us		= (10.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_50us		= (50.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_100us		= (100.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_250us		= (250.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_500us		= (500.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_1ms		= (1000.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_5ms		= (5000.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_12ms		= (12000.0/0.0064/MAX_QPS) + 1;
-static const ap_uint<32> TIME_64ms		= (64000.0/0.0064/MAX_QPS) + 1;
+static const ap_uint<32> TIME_10us		= (10.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_50us		= (50.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_100us		= (100.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_250us		= (250.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_500us		= (500.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_1ms		= (1000.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_5ms		= (5000.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_12ms		= (12000.0/0.004/MAX_QPS) + 1;
+static const ap_uint<32> TIME_64ms		= (64000.0/0.004/MAX_QPS) + 1;
 #endif
 
 struct event;
