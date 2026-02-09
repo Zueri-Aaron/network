@@ -541,6 +541,7 @@ void rx_exh_fsm(
 			timer_val = 0;
 #ifdef DBG_IBV
 			transport_protocol_dbg.write(6);
+			transport_protocol_dbg.write(timer_val);
 #endif
 
 #ifdef RETRANS_EN // ?
@@ -562,7 +563,7 @@ void rx_exh_fsm(
 		if (!msnTable2rxExh_rsp.empty() && !udpLengthFifo.empty() && (!consumeReadInit || !retrans2rx_init.empty()) && ((meta.op_code != RC_ACK) || !timer2flowcontrol.empty()))
 		{
 #ifdef DBG_IBV
-			transport_protocol_dbg.write(1); //MT zaaron
+			//transport_protocol_dbg.write(1); //MT zaaron
 #endif
 			msnTable2rxExh_rsp.read(dmaMeta);
 			udpLengthFifo.read(udpLength);
@@ -579,10 +580,11 @@ void rx_exh_fsm(
 			//MT zaaron
 			if (meta.op_code == RC_ACK)
 			{
+				timer2flowcontrol.read(timer_val);
 #ifdef DBG_IBV
 				transport_protocol_dbg.write(2);
+				transport_protocol_dbg.write(timer_val)
 #endif
-				timer2flowcontrol.read(timer_val);
 			}
 			pe_fsmState = DATA;
 		}
@@ -780,6 +782,7 @@ void rx_exh_fsm(
 			//MT zaaron
 #ifdef DBG_IBV
 			transport_protocol_dbg.write(3);
+			transport_protocol_dbg.write(timer_val);
 #endif
             m_axis_rx_ack_meta.write(ackMeta(meta.op_code, meta.dest_qp(19,0), readReqInit.host, 
                     readReqInit.host ? readReqInit.laddr(51,48) : 0, readReqInit.host ? readReqInit.laddr(53,52) : 0,

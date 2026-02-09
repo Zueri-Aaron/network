@@ -156,6 +156,8 @@ void transport_timer(
                 else {
                     tt_timer_out = TIME_64ms;
                 }
+                transport_timer_dbg.write(tt_timer_out);
+                transport_timer_dbg.write(entry.time);
                 timer2flowcontrol.write(tt_timer_out - entry.time);
             }
 			transportTimerTable[tt_update.qpn].time = TIME_1ms;
