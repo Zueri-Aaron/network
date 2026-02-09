@@ -583,7 +583,7 @@ void rx_exh_fsm(
 				timer2flowcontrol.read(timer_val);
 #ifdef DBG_IBV
 				transport_protocol_dbg.write(2);
-				transport_protocol_dbg.write(timer_val)
+				transport_protocol_dbg.write(timer_val);
 #endif
 			}
 			pe_fsmState = DATA;
