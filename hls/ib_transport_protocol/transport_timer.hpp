@@ -197,6 +197,9 @@ void transport_timer(
 	else if (!txSetTimer_req.empty())
     {
         // update transportTimerTable with new (timeout) time
+#ifdef DBG_IBV
+        transport_timer_dbg.write(1);
+#endif
         txSetTimer_req.read(setQP);
         if ((setQP - 3 < tt_currPosition) && (tt_currPosition <= setQP))
         {
@@ -230,12 +233,19 @@ void transport_timer(
         {
             tt_currPosition = 0;
         }
+#ifdef DBG_IBV
+        transport_timer_dbg.write(2);
+#endif
 
 		//Get entry from table
 		entry = transportTimerTable[checkQP];
 
         if (entry.active)
         {
+#ifdef DBG_IBV
+                transport_timer_dbg.write(3);
+                transport_timer_dbg.write(entry.time);
+#endif
             if (entry.time > 0 )
             {
                 entry.time--;
